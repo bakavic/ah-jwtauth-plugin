@@ -10,11 +10,12 @@ exports.jwtauth = function(api, next) {
         }
       });
     },
-    generateToken: function(data, success, fail) {
-      try {
-        var token = jsonwebtoken.sign(data, api.config.jwtauth.secret, {
-          algorithm: api.config.jwtauth.algorithm
-        });
+    generateToken: function(data, success, fail, options) {
+        options = options ? options : {};
+        options.algorithm = api.config.jwtauth.algorithm;
+
+        try {
+        var token = jsonwebtoken.sign(data, api.config.jwtauth.secret, options);
         success(token);
       } catch(err) {
         fail(err);

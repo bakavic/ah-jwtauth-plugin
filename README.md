@@ -17,6 +17,9 @@ An example header would be "Authorization: Token abce1234==", The value of the h
 
 ### Generate a token
 You need to generate a token once a user has successfully authenticated against your API, this could be by signing in with a username/password or you could simply generate them through a CMS, print them out and post them to your users ;-)
+`options` can be filled with the [options available](https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options) in auth0.
+
+**generateToken(jwtData, successfn, failFn, options);**
  
     api.jwtauth.generateToken({id: 1234, email: 'test@example.com'}, function(token) {
       // token will hold the generated token
@@ -26,6 +29,8 @@ You need to generate a token once a user has successfully authenticated against 
       // An error occured generating a token
       connection.error = err;
       next(connection, false);
+    }, {
+      expiresInMinutes: 1440
     });
 
 I would suggest not storing a huge amount of information in them as it will just mean more data transferred per request, but you can put some identifying info like email, name, etc. The beauty of this is that you don't need to hit the database every time to authenticate a user.
@@ -39,6 +44,19 @@ While the plugin will automatically validate a token and put it on the connectio
     }, function(err) {
       console.log('Error', err);
     });
+
+#### Expired token error
+If you passed in `expiresInMinutes` or `expiresInSeconds` attributes in generateToken's `options`, you can handle expired tokens separately from other JWT errors by catching `TokenExpiredError`.
+
+    api.jwtauth.processToken("abce1234==", function(data) {
+          // Valid data, lets set it and continue
+          console.log(data);
+        }, function(err) {
+          if (err instanceof TokenExpiredError) {
+            // handle for expired token here.
+          }
+          console.log('Error', err);
+        });
 
 ## Todo
 * Need to add in expiry, I personally dont use it but I may add it to my app with refreshing tokens in the future.
